@@ -1,0 +1,170 @@
+#Importing the libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import accuracy_score, classification_report
+
+#Importing the dataset
+data_df= pd.read_csv("/content/train.csv")
+data_df
+
+data_df.describe()
+
+data_df.info()
+
+data_df.isnull().sum()
+
+#Data Visualization
+
+# Create a boxplot
+plt.boxplot(data[:50])
+
+# Add labels and title
+plt.xlabel('X-axis Label')
+plt.ylabel('Y-axis Label')
+plt.title('Boxplot Example')
+
+# Show the plot
+plt.show()
+
+"""
+The boxplot will visually represent the distribution of the data, including the median, quartiles, and potential outliers.
+"""
+
+sns.heatmap(data_df.corr(), annot=True, cmap="YlGnBu", cbar=True)
+
+# Add labels and title
+plt.xlabel('X-axis Label')
+plt.ylabel('Y-axis Label')
+plt.title('Heatmap Example')
+
+# Show the plot
+plt.show()
+
+"""
+ heatmap will visually represent the strength and direction of correlations between the variables in your dataset, with warmer colors indicating 
+stronger positive correlations and cooler colors indicating stronger negative correlations
+"""
+
+X = data_df[['distance_traveled', 'num_of_passengers']]
+y = data_df['fare']
+
+#Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = make_pipeline(StandardScaler(), LinearRegression())# Train the model
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+predictions = model.predict(X_test)
+
+# Evaluate the model
+mse = mean_squared_error(y_test, predictions)
+print(f'Mean Squared Error: {mse}')
+
+test_data = pd.read_csv("/content/test.csv")
+test_data
+
+test_data.describe()
+
+
+test_data.info()
+
+test_data.isnull().sum()
+
+test_data['predicted_fare'] = model.predict(test_data[['distance_traveled', 'num_of_passengers']])
+
+# Replace the 'fare_amount' column with the predicted values
+test_data['fare'] = test_data['predicted_fare']
+
+# Drop the 'predicted_fare' column if you no longer need it
+test_data.drop('predicted_fare', axis=1, inplace=True)
+test_data['total_fare'] = test_data['tip'] + test_data['miscellaneous_fees'] + test_data['fare']
+test_data
+
+from sklearn.metrics import mean_absolute_error
+
+# Evaluate the model using Mean Absolute Error (MAE)
+mae = mean_absolute_error(y_test, predictions)
+print(f'Mean Absolute Error: {mae}')
+mse = mean_squared_error(y_test, predictions)
+print(f'Mean Squared Error: {mse}')
+
+import matplotlib.pyplot as plt
+
+# Scatter plot of actual vs. predicted values
+plt.scatter(y_test, predictions)
+plt.xlabel("Actual Fare Amount")
+plt.ylabel("Predicted Fare Amount")
+plt.title("Actual vs. Predicted Taxi Fare")
+plt.show()
+
+"""
+The scatter plot will show how closely the predicted values align with the actual values. Ideally, the points should be clustered along a diagonal
+line, indicating a strong correlation between predictions and actuals. Deviations from this line suggest prediction errors.
+"""
+
+#Random Forest Classifier model with parameter n_estimators=100
+from sklearn.ensemble import RandomForestRegressor
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+
+# Train the model
+rf_model.fit(X_train, y_train)
+
+# Make predictions on the test set
+predictions = rf_model.predict(X_test)
+
+# Evaluate the model using Mean Squared Error (MSE)
+mse = mean_squared_error(y_test, predictions)
+print(f'Mean Squared Error: {mse}')
+
+#Find important features with Random Forest model
+# view the feature scores
+feature_scores = pd.Series(rf_model.feature_importances_, index=X_train.columns).sort_values(ascending=False)
+feature_scores
+
+feature_importances = rf_model.feature_importances_
+
+# Visualize feature importances
+features = X.columns
+plt.bar(features, feature_importances)
+plt.xlabel('Features')
+plt.ylabel('Importance')
+plt.title('Feature Importance in Random Forest Model')
+plt.show()
+
+#Visualize feature scores of the features
+# Creating a seaborn bar plot
+sns.barplot(x=feature_scores.index, y=feature_scores)
+
+# Add labels to the graph
+plt.xlabel('Features')
+plt.ylabel('Feature Importance Score')
+
+# Add title to the graph
+plt.title("Visualizing Important Features")
+
+# Visualize the graph
+plt.show()
+
+plt.scatter(y_test, predictions)
+plt.xlabel("Actual Fare Amount")
+plt.ylabel("Predicted Fare Amount")
+plt.title("Actual vs. Predicted Taxi Fare (Random Forest)")
+plt.show()
+
+"""
+compare the actual taxi fare amounts (y_test) against the fare amounts predicted by a Random Forest model (predictions).how well the Random Forest
+model's predictions align with the actual taxi fare amounts. Ideally, the points on the plot should cluster closely around a diagonal line, 
+indicating a strong correlation between predicted and actual values.
+"""
+
+
+
+#Link For Google Collab Notebook : https://colab.research.google.com/drive/115iroggCjdlYFD2H1tL6SeWLg_JuBPAG?usp=sharing
